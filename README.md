@@ -1,36 +1,71 @@
-# Brent Oil Price Change Point Analysis 
+
+# Brent Oil Price Change Point Analysis
 
 ## Project Overview
-This project aims to analyze the impact of major geopolitical and economic events on Brent oil prices over the past decades. Using Bayesian change point analysis, the study seeks to identify structural breaks in the time series and associate them with key market events.
+This project analyzes the impact of major geopolitical and economic events on Brent crude oil prices using **Bayesian Change Point Analysis**. The objective is to identify statistically significant structural breaks in oil price dynamics and associate them with real-world events such as financial crises, geopolitical conflicts, pandemics, and OPEC policy changes.
 
 **Business Context:**  
-Birhan Energies provides data-driven insights for investors, policymakers, and energy companies. Understanding how political decisions, conflicts, sanctions, and OPEC policies affect oil prices can improve risk management and strategic decision-making.
+Birhan Energies provides data-driven insights for investors, policymakers, and energy companies. Understanding how political decisions, conflicts, sanctions, and global shocks influence oil prices supports:
+- Better risk management  
+- Improved investment timing  
+- Policy evaluation  
+- Strategic operational planning  
 
 ---
 
-## Interim Submission Scope
-This interim submission covers **Task 1**:
+### 1. Data Understanding and Preparation
+- Loaded raw Brent oil price data (`data/raw/BrentOilPrices.csv`)
+- Cleaned, parsed dates, and sorted the dataset chronologically
+- Computed log returns to stabilize variance and enable stationarity analysis
 
-1. **Data Understanding and Preparation**
-   - Loaded raw Brent oil price data (`data/raw/BrentOilPrices.csv`)
-   - Cleaned and sorted the data by date
-   - Calculated log returns for stationarity analysis
+### 2. Exploratory Data Analysis (EDA)
+- Visualized long-term price trends
+- Examined volatility clustering via log returns
+- Conducted Augmented Dickey-Fuller (ADF) test to confirm stationarity
 
-2. **Exploratory Data Analysis (EDA)**
-   - Plotted price series to identify trends, volatility, and major shifts
-   - Plotted log returns to highlight volatility clustering
-   - Performed stationarity test (ADF) on log returns
+### 3. Event Data Compilation
+- Researched and compiled 10–15 major geopolitical and economic events
+- Stored in `data/events/oil_market_events.csv` with:
+  - `Date`: approximate event start date
+  - `Event`: short description
 
-3. **Event Data Compilation**
-   - Compiled 10–15 key geopolitical and economic events impacting oil prices
-   - Structured in `data/events/oil_market_events.csv` with:
-     - `Date` – approximate start date of the event
-     - `Event` – short description
+### 4. Assumptions & Limitations
+- Only major, widely documented events are included
+- Log returns are assumed to be stationary
+- Statistical correlation does not imply causation
 
-4. **Assumptions & Limitations**
-   - Only major, well-documented events are included
-   - Analysis assumes log returns are stationary
-   - Correlation does not imply causation; change points indicate statistical shifts, not proof of direct cause
+---
+
+
+### Task 2: Bayesian Change Point Modeling
+- Implemented a Bayesian change point model using **PyMC**
+- Estimated:
+  - Change point location (`tau`)
+  - Mean returns before and after regime shifts (`μ₁`, `μ₂`)
+- Evaluated model convergence using trace plots and R-hat diagnostics
+- Visualized posterior distributions to quantify uncertainty
+
+**Key Insight:**  
+Detected change points align with major global disruptions such as the **2008 Global Financial Crisis** and the **COVID-19 market shock**, indicating statistically significant regime changes in oil price behavior.
+
+---
+
+### Task 3: Event Impact Analysis & API Dashboard
+- Associated detected change points with real-world geopolitical and economic events
+- Interpreted impacts on price levels and volatility
+- Built a **Flask-based REST API** to expose analysis results for dashboard use
+
+---
+
+## API Endpoints
+
+Once the Flask server is running, the following endpoints are available:
+
+| Endpoint | Description |
+|--------|-------------|
+| `/api/prices` | Historical Brent oil prices (JSON) |
+| `/api/events` | Major geopolitical & economic events |
+| `/api/changepoints` | Detected structural change points |
 
 ---
 
@@ -82,5 +117,37 @@ source venv/bin/activate   # Linux/Mac
 ```bash
 pip install -r requirements.txt
 ```
+## Running the API Dashboard
 
+From the project root:
 
+```bash
+export FLASK_APP=src/api/app.py   # Linux / Mac
+# set FLASK_APP=src/api/app.py    # Windows
+
+flask run
+```
+Access the API at:
+```bash
+http://127.0.0.1:5000/api/prices
+
+http://127.0.0.1:5000/api/events
+
+http://127.0.0.1:5000/api/changepoints
+```
+## Assumptions & Limitations
+
+- Change points indicate statistical regime shifts, not definitive causality  
+- Event dates are approximate and may not reflect delayed market reactions  
+- The model assumes piecewise constant mean behavior  
+- External macroeconomic variables were not explicitly included  
+
+## Future Work
+
+- Incorporate macroeconomic indicators (GDP, inflation, FX rates)  
+- Extend the model to volatility regime detection  
+- Build a full interactive frontend dashboard (React / Plotly)  
+- Containerize and deploy the API using Docker  
+
+## Author
+### Kalkidan Abreham
