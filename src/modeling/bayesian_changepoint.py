@@ -1,27 +1,57 @@
 import pymc as pm
 import numpy as np
+import arviz as az
+from typing import Tuple
+from ..config import ModelConfig
 
-def bayesian_change_point(returns):
+
+
+def build_model(returns: np.ndarray):
     n = len(returns)
     idx = np.arange(n)
 
     with pm.Model() as model:
-        tau = pm.DiscreteUniform("tau", lower=0, upper=n-1)
 
+        # Continuous changepoint location
+        tau = pm.Uniform("tau", lower=0, upper=n)
+
+        # Regime means
         mu_1 = pm.Normal("mu_1", mu=0, sigma=1)
         mu_2 = pm.Normal("mu_2", mu=0, sigma=1)
 
         sigma = pm.Exponential("sigma", 1)
 
-        mu = pm.math.switch(idx < tau, mu_1, mu_2)
+        # Smooth transition using sigmoid
+        w = pm.math.sigmoid((idx - tau) / 1.0)
 
-        obs = pm.Normal("obs", mu=mu, sigma=sigma, observed=returns)
+        mu = (1 - w) * mu_1 + w * mu_2
 
+        pm.Normal("obs", mu=mu, sigma=sigma, observed=returns)
+
+    return model
+
+def sample_model(model, config: ModelConfig):
+    with model:
         trace = pm.sample(
-            draws=2000,
-            tune=1000,
-            target_accept=0.95,
+            draws=config.draws,
+            tune=config.tune,
+            chains=4,
+            cores=4,
+            target_accept=0.9,
+            random_seed=config.random_seed,
             return_inferencedata=True
         )
+    return trace
+def extract_tau_summary(trace):
 
-    return model, trace
+    tau_samples = trace.posterior["tau"].values.flatten()
+
+    tau_mean = int(np.mean(tau_samples))
+    tau_ci_low = int(np.percentile(tau_samples, 2.5))
+    tau_ci_high = int(np.percentile(tau_samples, 97.5))
+
+    return {
+        "tau_mean": tau_mean,
+        "tau_ci_low": tau_ci_low,
+        "tau_ci_high": tau_ci_high
+    }
