@@ -1,75 +1,44 @@
+# Brent Oil Price Regime Change Analysis
 
-# Brent Oil Price Change Point Analysis
+## 📌 Project Overview
+This project analyzes structural regime shifts in Brent crude oil prices using Bayesian changepoint detection. It identifies statistically significant shifts in return dynamics and evaluates their impact on risk metrics such as volatility, Sharpe ratio, and drawdown.
 
-## Project Overview
-This project analyzes the impact of major geopolitical and economic events on Brent crude oil prices using **Bayesian Change Point Analysis**. The objective is to identify statistically significant structural breaks in oil price dynamics and associate them with real-world events such as financial crises, geopolitical conflicts, pandemics, and OPEC policy changes.
+The system is built as a full-stack data science application:
+- Offline Bayesian modeling (PyMC)
+- Flask REST API
+- Streamlit interactive dashboard
+- Modular, production-aware architecture
 
-**Business Context:**  
-Birhan Energies provides data-driven insights for investors, policymakers, and energy companies. Understanding how political decisions, conflicts, sanctions, and global shocks influence oil prices supports:
-- Better risk management  
-- Improved investment timing  
-- Policy evaluation  
-- Strategic operational planning  
+## 🎯 Objectives
+- Detect structural breaks in Brent oil returns
+- Quantify risk regime differences
+- Connect changepoints to real-world geopolitical and economic events
+- Provide an interactive analytical dashboard
 
----
+## 🧠 Methodology
 
-### 1. Data Understanding and Preparation
-- Loaded raw Brent oil price data (`data/raw/BrentOilPrices.csv`)
-- Cleaned, parsed dates, and sorted the dataset chronologically
-- Computed log returns to stabilize variance and enable stationarity analysis
+### Data Processing
+- Daily Brent oil prices
+- Weekly resampling
+- Log returns computation
+- Event dataset integration
 
-### 2. Exploratory Data Analysis (EDA)
-- Visualized long-term price trends
-- Examined volatility clustering via log returns
-- Conducted Augmented Dickey-Fuller (ADF) test to confirm stationarity
+### Bayesian Changepoint Model
+We implement a continuous changepoint model:
+- Smooth regime transition using sigmoid weighting
+- Fully NUTS-based sampling
+- 4 chains, 2000 tuning steps, 4000 posterior draws
 
-### 3. Event Data Compilation
-- Researched and compiled 10–15 major geopolitical and economic events
-- Stored in `data/events/oil_market_events.csv` with:
-  - `Date`: approximate event start date
-  - `Event`: short description
+**Parameters:**
+- τ (changepoint location)
+- μ₁, μ₂ (regime means)
+- σ (volatility)
 
-### 4. Assumptions & Limitations
-- Only major, widely documented events are included
-- Log returns are assumed to be stationary
-- Statistical correlation does not imply causation
+Posterior summaries are saved to:  
+`data/processed/changepoints.csv`
 
----
+## 🏗 Project Architecture
 
-
-### Task 2: Bayesian Change Point Modeling
-- Implemented a Bayesian change point model using **PyMC**
-- Estimated:
-  - Change point location (`tau`)
-  - Mean returns before and after regime shifts (`μ₁`, `μ₂`)
-- Evaluated model convergence using trace plots and R-hat diagnostics
-- Visualized posterior distributions to quantify uncertainty
-
-**Key Insight:**  
-Detected change points align with major global disruptions such as the **2008 Global Financial Crisis** and the **COVID-19 market shock**, indicating statistically significant regime changes in oil price behavior.
-
----
-
-### Task 3: Event Impact Analysis & API Dashboard
-- Associated detected change points with real-world geopolitical and economic events
-- Interpreted impacts on price levels and volatility
-- Built a **Flask-based REST API** to expose analysis results for dashboard use
-
----
-
-## API Endpoints
-
-Once the Flask server is running, the following endpoints are available:
-
-| Endpoint | Description |
-|--------|-------------|
-| `/api/prices` | Historical Brent oil prices (JSON) |
-| `/api/events` | Major geopolitical & economic events |
-| `/api/changepoints` | Detected structural change points |
-
----
-
-## Repository Structure
 ```bash 
 brent-oil-change-point-analysis/
 │
@@ -80,20 +49,23 @@ brent-oil-change-point-analysis/
 │ │ └── log_returns.csv
 │ └── events/ # Key events dataset
 │ └── oil_market_events.csv
-│
+├── project_scripts/
+│   └── run_changepoint_analysis.py
 ├── notebooks/
-│ ├── 01_eda.ipynb # EDA and stationarity analysis (Task 1)
-│ ├── 02_change_point_model.ipynb # Placeholder for Task 2
-│ └── 03_event_impact_analysis.ipynb # Placeholder for Task 2/3
+│ ├── 01_eda.ipynb # EDA and stationarity analysis 
+│ ├── 02_change_point_model.ipynb 
+│ └── 03_event_impact_analysis.ipynb 
 │
 ├── src/
-│ ├── utils/
-│ │ └── preprocessing.py # Functions to load and clean data
-│ ├── modeling/
-│ │ └── bayesian_changepoint.py # Placeholder for Task 2
-│ └── api/
-│ └── app.py # Placeholder for Task 3 dashboard
-│
+│   ├── api/
+│   ├── modeling/
+|       ├── bayesian_change_point.py
+│       └── risk_metrics.py
+│   ├── utils/
+│   ├── config.py
+├── tests/
+│   ├── test_preprocessing.py
+│   ├── test_risk_metrics.py
 ├── requirements.txt # Project dependencies
 └── README.md # Project description and instructions
 ```
@@ -117,37 +89,55 @@ source venv/bin/activate   # Linux/Mac
 ```bash
 pip install -r requirements.txt
 ```
-## Running the API Dashboard
 
-From the project root:
-
+## 🚀 How to Run
+1. **Run Bayesian Analysis**  
 ```bash
-export FLASK_APP=src/api/app.py   # Linux / Mac
-# set FLASK_APP=src/api/app.py    # Windows
+python -m project_scripts.run_changepoint_analysis
 
-flask run
 ```
-Access the API at:
+2. **Start Flask API
 ```bash
-http://127.0.0.1:5000/api/prices
-
-http://127.0.0.1:5000/api/events
-
-http://127.0.0.1:5000/api/changepoints
+python -m flask --app src.api.app run
 ```
-## Assumptions & Limitations
+3. Launch Dashboard
+```bash
+stereamlit run app.py
+```
 
-- Change points indicate statistical regime shifts, not definitive causality  
-- Event dates are approximate and may not reflect delayed market reactions  
-- The model assumes piecewise constant mean behavior  
-- External macroeconomic variables were not explicitly included  
+# 📊 API Endpoints
 
-## Future Work
+| Endpoint              | Description                     |
+|----------------------|---------------------------------|
+| `/api/prices`         | Historical price data           |
+| `/api/events`         | Oil market events               |
+| `/api/changepoints`   | Bayesian detected regime shift  |
+| `/api/risk_metrics`   | Before vs After regime metrics  |
 
-- Incorporate macroeconomic indicators (GDP, inflation, FX rates)  
-- Extend the model to volatility regime detection  
-- Build a full interactive frontend dashboard (React / Plotly)  
-- Containerize and deploy the API using Docker  
+# 📈 Risk Metrics
+
+- **Annualized Volatility**
+- **Sharpe Ratio**
+- **Maximum Drawdown**
+
+# 🧪 Testing
+
+Run:
+```bash
+pytest
+```
+# ⚠ Known Limitations
+
+- Continuous changepoint approximation
+- Sampling can be computationally expensive
+- Single changepoint assumption
+
+# 🔮 Future Work
+
+- Multiple changepoint extension
+- Volatility regime modeling (GARCH)
+- SHAP-based explainability for predictive extensions
+
 
 ## Author
 ### Kalkidan Abreham
