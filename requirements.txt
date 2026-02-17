@@ -7,3 +7,6 @@ arviz
 scipy
 flask
 flask-cors
+streamlit
+pytest
+statsmodels
