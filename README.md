@@ -1,19 +1,51 @@
 # Brent Oil Price Regime Change Analysis
+## 🔍 Short Description
 
-## 📌 Project Overview
-This project analyzes structural regime shifts in Brent crude oil prices using Bayesian changepoint detection. It identifies statistically significant shifts in return dynamics and evaluates their impact on risk metrics such as volatility, Sharpe ratio, and drawdown.
+This project detects structural regime shifts in Brent crude oil prices using Bayesian changepoint modeling. It quantifies how geopolitical and economic shocks alter market dynamics and evaluates the financial risk impact before and after detected regime changes.
 
-The system is built as a full-stack data science application:
-- Offline Bayesian modeling (PyMC)
-- Flask REST API
-- Streamlit interactive dashboard
-- Modular, production-aware architecture
+### 🛠 Built With
 
-## 🎯 Objectives
-- Detect structural breaks in Brent oil returns
-- Quantify risk regime differences
-- Connect changepoints to real-world geopolitical and economic events
-- Provide an interactive analytical dashboard
+- PyMC (Bayesian modeling)  
+- Flask (REST API)  
+- Streamlit (Interactive dashboard)  
+- PyTest + GitHub Actions (CI/CD)  
+
+---
+
+## 💼 Business Problem
+
+Oil prices are heavily influenced by geopolitical shocks, supply disruptions, and macroeconomic crises. Financial institutions, energy traders, and policymakers need to detect structural shifts early to:
+
+- Adjust hedging strategies  
+- Reprice risk exposure  
+- Rebalance portfolios  
+- Understand regime-dependent volatility  
+
+Traditional statistical models assume stable distributions.  
+Markets are not stable.
+
+### This Project Addresses
+
+**When did the statistical behavior of Brent oil returns fundamentally change?**
+
+---
+
+## 🧠 Solution Overview
+
+We implement a Bayesian changepoint model that:
+
+- Identifies a structural break in oil returns  
+- Estimates regime-specific mean and volatility  
+- Quantifies uncertainty in changepoint location  
+- Compares financial risk metrics across regimes  
+
+### 🏗 Architecture
+```bash
+Offline Bayesian Modeling → Flask API → Streamlit Dashboard  
+```
+
+Model sampling is performed offline and results are served via API for production-style separation of concerns.
+
 
 ## 🧠 Methodology
 
@@ -126,6 +158,42 @@ Run:
 ```bash
 pytest
 ```
+## 🔬 Technical Details
+
+### 📊 Data
+
+- Brent Oil Daily Prices  
+- Weekly resampling  
+- Log return transformation  
+- Event dataset integration  
+
+---
+
+### 🧠 Model
+
+**Bayesian continuous changepoint model:**
+
+- τ ~ Uniform(0, N)  
+- μ₁, μ₂ ~ Normal(0, 1)  
+- σ ~ Exponential(1)  
+- Smooth transition via sigmoid weighting  
+
+**Sampling Configuration:**
+
+- NUTS sampler  
+- 4 chains  
+- 2000 tuning steps  
+- 4000 posterior draws  
+
+---
+
+### 📈 Evaluation
+
+- R-hat diagnostics  
+- Effective sample size  
+- Posterior credible intervals  
+- Regime-based risk comparison  
+
 # ⚠ Known Limitations
 
 - Continuous changepoint approximation
@@ -139,5 +207,11 @@ pytest
 - SHAP-based explainability for predictive extensions
 
 
-## Author
-### Kalkidan Abreham
+## 👤 Author
+
+### Kalkidan Abreham  
+
+- **LinkedIn:** https://www.linkedin.com/in/kalkidan-abreham-50040b319/  
+- **Email:** kalkidanabreham214@gmail.com  
+- **GitHub:** https://github.com/kalkidanzabreham/brent-oil-change-point-analysis  
+
