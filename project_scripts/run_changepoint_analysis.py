@@ -1,5 +1,7 @@
 import os
 import pandas as pd
+import arviz as az
+
 
 from src.utils.loader import load_price_data
 from src.utils.preprocessing import compute_log_returns
@@ -34,3 +36,6 @@ pd.DataFrame({
 }).to_csv(OUTPUT_PATH, index=False)
 
 print("Changepoint saved to:", OUTPUT_PATH)
+
+az.to_netcdf(trace, "data/processed/trace.nc")
+print("Trace saved to data/processed/trace.nc")
